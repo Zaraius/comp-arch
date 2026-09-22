@@ -1,0 +1,1 @@
+// take input of clock and R, G, B value and give output of pwm

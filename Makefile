@@ -1,4 +1,4 @@
-filename = rgb
+filename = fsm
 pcf_file = iceBlinkPico.pcf
 
 build:
