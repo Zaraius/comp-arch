@@ -1,4 +1,4 @@
-filename = fsm
+filename = top
 pcf_file = iceBlinkPico.pcf
 
 build:

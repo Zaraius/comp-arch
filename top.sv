@@ -1,26 +1,60 @@
-'timescale 10ns / 10ps
 `include "fsm.sv"
+`include "pwm.sv"
 
-// Finite State Machine Top-Level Module
+// Fade top level module
 
-module top(
+module top #(
+    parameter PWM_INTERVAL = 1200       // CLK frequency is 12MHz, so 1,200 cycles is 100us
+)(
     input logic     clk, 
-    output logic    RGB_R, 
-    output logic    RGB_G, 
-    output logic    RGB_B
+    output logic    LED,
+    output logic RGB_R,
+    output logic RGB_G,
+    output logic RGB_B
 );
 
-    logic red, green, blue;
+    logic [$clog2(PWM_INTERVAL)-1:0] r_pwm_value;
+    logic [$clog2(PWM_INTERVAL)-1:0] g_pwm_value;
+    logic [$clog2(PWM_INTERVAL)-1:0] b_pwm_value;
+    logic r_pwm_out;
+    logic g_pwm_out;
+    logic b_pwm_out;
 
-    fsm u0(
-        .clk    (clk), 
-        .red    (red), 
-        .green  (green), 
-        .blue   (blue)
+    fsm #(
+        .PWM_INTERVAL   (PWM_INTERVAL)
+    ) u1 (
+        .clk            (clk), 
+        .r_pwm_value      (r_pwm_value),
+        .g_pwm_value      (g_pwm_value),
+        .b_pwm_value      (b_pwm_value)
     );
 
-    assign RGB_R = ~red;
-    assign RGB_G = ~green;
-    assign RGB_B = ~blue;
+    pwm #(
+        .PWM_INTERVAL(PWM_INTERVAL)
+    ) pwm_red (
+        .clk(clk),
+        .pwm_value(r_pwm_value),
+        .pwm_out(r_pwm_out)
+    );
+
+    pwm #(
+        .PWM_INTERVAL(PWM_INTERVAL)
+    ) pwm_green (
+        .clk(clk),
+        .pwm_value(g_pwm_value),
+        .pwm_out(g_pwm_out)
+    );
+
+    pwm #(
+        .PWM_INTERVAL(PWM_INTERVAL)
+    ) pwm_blue (
+        .clk(clk),
+        .pwm_value(b_pwm_value),
+        .pwm_out(b_pwm_out)
+    );
+
+    assign RGB_R = ~r_pwm_out;
+    assign RGB_B = ~b_pwm_out;
+    assign RGB_G = ~g_pwm_out;
 
 endmodule
